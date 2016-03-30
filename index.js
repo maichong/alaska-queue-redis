@@ -34,10 +34,13 @@ class RedisQueueDriver {
 
   /**
    * [async] 读取队列中的元素
-   * @param {number} timeout 超时时间,单位秒
+   * @param {number} timeout 超时时间,单位秒,默认Infinity(实际1年)
    * @returns {boolean}
    */
   pop(timeout) {
+    if (timeout === undefined) {
+      timeout = 365 * 86400;
+    }
     let method = timeout ? 'blpop' : 'lpop';
     return new Promise((resolve, reject)=> {
       let args = [this.key];
@@ -50,7 +53,10 @@ class RedisQueueDriver {
         } else {
           if (res !== null) {
             try {
-              res = JSON.parse(res[1]);
+              if (Array.isArray(res)) {
+                res = res[1];
+              }
+              res = JSON.parse(res);
             } catch (error) {
               res = null;
             }
@@ -65,18 +71,8 @@ class RedisQueueDriver {
   /**
    * 销毁队列
    */
-  destory() {
+  destroy() {
     this._driver = null;
-  }
-
-  /**
-   * 通过Key
-   * @param {string} key
-   * @param {object} options
-   * @returns {RedisQueueDriver}
-   */
-  static instance(key, options) {
-    return new RedisQueueDriver(key, options);
   }
 }
 

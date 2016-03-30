@@ -1,10 +1,9 @@
 {
   "name": "alaska-queue-redis",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Alaska redis queue driver",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maichong/alaska-queue-redis.git"
