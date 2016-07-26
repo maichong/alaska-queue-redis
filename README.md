@@ -7,6 +7,8 @@ Alaska redis queue driver
 
 queue: {
   type: 'alaska-queue-redis',
+  key: 'myQueue',
+  idle: 5, // idle drivers count
   // The connection URI string
   url: 'redis://localhost/0',
   //more https://github.com/NodeRedis/node_redis#options-is-an-object-with-the-following-possible-properties

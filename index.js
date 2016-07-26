@@ -10,15 +10,16 @@ const redis = require('redis');
 
 class RedisQueueDriver {
 
-  constructor(key, options) {
-    this.key = key;
+  constructor(options) {
+    this.key = options.key;
+    this.options = options;
+    this.isQueueDriver = true;
     this._driver = redis.createClient(options);
   }
 
   /**
    * [async] 将元素插入队列
    * @param {*} item
-   * @returns {boolean}
    */
   push(item) {
     return new Promise((resolve, reject)=> {
@@ -34,18 +35,15 @@ class RedisQueueDriver {
 
   /**
    * [async] 读取队列中的元素
-   * @param {number} timeout 超时时间,单位秒,默认Infinity(实际1年)
-   * @returns {boolean}
+   * @param {number} timeout 超时时间,单位毫秒,默认不阻塞,为0则永久阻塞
+   * @returns {*}
    */
   pop(timeout) {
-    if (timeout === undefined) {
-      timeout = 365 * 86400;
-    }
-    let method = timeout ? 'blpop' : 'lpop';
+    let method = timeout === undefined ? 'lpop' : 'blpop';
     return new Promise((resolve, reject)=> {
       let args = [this.key];
-      if (timeout) {
-        args.push(timeout);
+      if (method === 'blpop') {
+        args.push(parseInt(timeout / 1000));
       }
       args.push(function (error, res) {
         if (error) {
@@ -69,9 +67,16 @@ class RedisQueueDriver {
   }
 
   /**
+   * 释放当前所有任务,进入空闲状态
+   */
+  free() {
+  }
+
+  /**
    * 销毁队列
    */
   destroy() {
+    this._driver.quit();
     this._driver = null;
   }
 }
